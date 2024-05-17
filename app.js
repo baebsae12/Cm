@@ -1,5 +1,5 @@
 const express = require("express");
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const http = require("http");
 const app = express();
 const path = require("path");
@@ -7,15 +7,13 @@ const server = http.createServer(app);
 const socketIO = require("socket.io");
 const moment = require("moment");
 
-// MySQL 커넥션 풀 생성
-const pool = mysql.createPool({
-    connectionLimit: 10, // 동시에 유지할 수 있는 최대 연결 수
+const pool = require('mysql').createPool({
     host: "localhost",
-    user: "Cm",
-    password: "1234",
-    port: 3306,
-    database: "users"
+    user: "root", 
+    password: "root", 
+    database: "subBox" 
 });
+
 
 // MySQL 커넥션 풀 연결
 pool.getConnection((err, connection) => {
@@ -32,7 +30,7 @@ pool.getConnection((err, connection) => {
 const io = socketIO(server);
 
 app.use(express.static(path.join(__dirname, "src")));
-const PORT = process.env.PORT || 3306;
+const PORT = process.env.PORT || 8080;
 
 io.on("connection", (socket) => {
     socket.on("chatting", (data) => {
