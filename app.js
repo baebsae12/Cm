@@ -7,13 +7,12 @@ const server = http.createServer(app);
 const socketIO = require("socket.io");
 const moment = require("moment");
 
-const pool = require('mysql').createPool({
-    host: "localhost",
+const pool = mysql.createPool({
+    host: "db",
     user: "root", 
-    password: "root", 
-    database: "subBox" 
+    password: "rootpassword", 
+    database: "subBox"
 });
-
 
 // MySQL 커넥션 풀 연결
 pool.getConnection((err, connection) => {
@@ -44,4 +43,4 @@ io.on("connection", (socket) => {
     });
 });
 
-server.listen(PORT, () => console.log(`server is running ${PORT}`));
+server.listen(PORT, () => console.log(`server is running on port ${PORT}`));
