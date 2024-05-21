@@ -46,7 +46,7 @@
             if(username && userpwd){
                 $.ajax({
                     type: "POST",
-                    url: "http://192.168.101.81:8080/chat",
+                    url: "http://192.168.101.81:8080/api/register",
                     contentType: "application/json",
                     data: JSON.stringify({ username: username, userpwd: userpwd }),
                     success: function(response) {
@@ -68,7 +68,7 @@
         });
 
         function connectWebSocket() {
-            websocket = new WebSocket("192.168.101.81:8080")
+            websocket = new WebSocket("ws://192.168.101.81:8080/ws/chat")
 
             websocket.onmessage = onMessage;
             websocket.onopen = onOpen;
