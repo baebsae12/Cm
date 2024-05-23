@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './index.css';
+import './style.css'; // 이곳에 필요한 CSS를 추가하세요.
 
 function App() {
   const [username, setUsername] = useState('');
@@ -7,11 +7,12 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [msg, setMsg] = useState('');
   const [messages, setMessages] = useState([]);
-  //const [image, setImage] = useState(null);
+
   let websocket;
 
   const connectWebSocket = () => {
     websocket = new WebSocket("ws://192.168.101.81:8080/ws/chat");
+
     websocket.onmessage = onMessage;
     websocket.onopen = onOpen;
     websocket.onclose = onClose;
@@ -61,27 +62,8 @@ function App() {
   };
 
   const handleSend = () => {
-    let messageToSend = msg.trim(); // trim 메서드를 사용하여 공백을 제거합니다.
-    if (messageToSend) {
-      send(messageToSend);
-    } else {
-      alert("Please enter a message to send.");
-    }
-  };
-
-  const send = (message) => {
-    websocket.send(username + ":" + message);
+    websocket.send(username + ":" + msg);
     setMsg('');
-  };
-
-  const formatMessage = (message) => {
-    const urlPattern = /(https?:\/\/[^\s]+)/g;
-    return message.split(urlPattern).map((part, index) => {
-      if (urlPattern.test(part)) {
-        return <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a>;
-      }
-      return part;
-    });
   };
 
   return (
@@ -119,7 +101,7 @@ function App() {
             <div id="msgArea" className="col">
               {messages.map((message, index) => (
                 <div key={index} className={`col-6 alert alert-${message.type}`}>
-                  <b>{message.sessionId} : {formatMessage(message.message)}</b>
+                  <b>{message.sessionId} : {message.message}</b>
                 </div>
               ))}
             </div>
@@ -140,36 +122,11 @@ function App() {
                     id="button-send"
                     onClick={handleSend}
                   >
-                    Send
+                    전송
                   </button>
                 </div>
               </div>
             </div>
-            {/*
-            <div className="col-6">
-              <div className="input-group mb-3">
-                <form id="uploadForm" encType="multipart/form-data">
-                  <input
-                    type="file"
-                    id="imageInput"
-                    name="image"
-                    className="form-control"
-                    onChange={handleImageChange}
-                  />
-                  <div className="input-group-append">
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      id="button-upload"
-                      onClick={handleSend}
-                    >
-                      Upload File
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-            */}
           </div>
         )}
       </div>
