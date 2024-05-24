@@ -1,43 +1,42 @@
-import React, { useState } from 'react';
-import './index.css';
+import React, { useState, useEffect } from 'react'; //리엑트와 유즈 스테이트,이펙트를를 사용하기위해 리엑트에서 임포트한다. 
+import './index.css'; //css에서 임포트한다
 
 function App() {
-  const [username, setUsername] = useState('');
-  const [userpwd, setUserpwd] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');//상태를 관리하기위해(username은 현재 상태, setUsername은 상태를 업데이트 하기 위해 useState에 저장해줍니다) 
+  const [userpwd, setUserpwd] = useState('');//위와 같은 내용(pw의 현재상태, pw의 상태를 알기 위해)
+  const [loggedIn, setLoggedIn] = useState(false);//로그인을 했는지 확인하고 로그인을 했다면 useState가 true로 업데이트 하기 위해(기본값은 false)
   const [msg, setMsg] = useState('');
   const [messages, setMessages] = useState([]);
-  //const [image, setImage] = useState(null);
   let websocket;
+
+  /*
+    
+  */
+
+  useEffect(() => {
+    if (loggedIn) {
+      connectWebSocket();
+    }
+  }, [loggedIn]);
 
   const connectWebSocket = () => {
     websocket = new WebSocket("ws://192.168.101.81:8080/ws/chat");
     websocket.onmessage = onMessage;
-    websocket.onopen = onOpen;
     websocket.onclose = onClose;
   };
 
-  const onClose = (evt) => {
+  const onClose = () => {
     const str = username + ": 님이 방을 나가셨습니다.";
     websocket.send(str);
   };
 
-  const onOpen = (evt) => {
-    const str = username + ": 님이 입장하셨습니다.";
-    websocket.send(str);
-  };
-
-  const onMessage = (msg) => {
-    const data = msg.data;
+  const onMessage = (event) => {
+    const data = event.data;
     const arr = data.split(":");
     const sessionId = arr[0];
     const message = arr[1];
 
-    if (sessionId === username) {
-      setMessages([...messages, { sessionId, message, type: 'sent' }]);
-    } else {
-      setMessages([...messages, { sessionId, message, type: 'received' }]);
-    }
+    setMessages(prevMessages => [...prevMessages, { sessionId, message }]);
   };
 
   const handleLogin = () => {
@@ -52,7 +51,6 @@ function App() {
         .then(response => response.json())
         .then(() => {
           setLoggedIn(true);
-          connectWebSocket();
         })
         .catch(error => alert("Error registering user: " + error));
     } else {
@@ -61,27 +59,13 @@ function App() {
   };
 
   const handleSend = () => {
-    let messageToSend = msg.trim(); // trim 메서드를 사용하여 공백을 제거합니다.
+    let messageToSend = msg.trim();
     if (messageToSend) {
-      send(messageToSend);
+      websocket.send(username + ":" + messageToSend);
+      setMsg('');
     } else {
       alert("Please enter a message to send.");
     }
-  };
-
-  const send = (message) => {
-    websocket.send(username + ":" + message);
-    setMsg('');
-  };
-
-  const formatMessage = (message) => {
-    const urlPattern = /(https?:\/\/[^\s]+)/g;
-    return message.split(urlPattern).map((part, index) => {
-      if (urlPattern.test(part)) {
-        return <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a>;
-      }
-      return part;
-    });
   };
 
   return (
@@ -118,8 +102,8 @@ function App() {
           <div id="chatArea" className="col">
             <div id="msgArea" className="col">
               {messages.map((message, index) => (
-                <div key={index} className={`col-6 alert alert-${message.type}`}>
-                  <b>{message.sessionId} : {formatMessage(message.message)}</b>
+                <div key={index} className="col-6 alert alert-info">
+                  <b>{message.sessionId} : {message.message}</b>
                 </div>
               ))}
             </div>
@@ -145,31 +129,6 @@ function App() {
                 </div>
               </div>
             </div>
-            {/*
-            <div className="col-6">
-              <div className="input-group mb-3">
-                <form id="uploadForm" encType="multipart/form-data">
-                  <input
-                    type="file"
-                    id="imageInput"
-                    name="image"
-                    className="form-control"
-                    onChange={handleImageChange}
-                  />
-                  <div className="input-group-append">
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      id="button-upload"
-                      onClick={handleSend}
-                    >
-                      Upload File
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-            */}
           </div>
         )}
       </div>
